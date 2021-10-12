@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+def build(bld):
+    bld.ap_program(
+        program_name='simplesub',
+        program_groups=['bin', 'simplesub'],
+        use='ap'
+    )
