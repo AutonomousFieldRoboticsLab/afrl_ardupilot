@@ -52,17 +52,18 @@ private:
     uint32_t last_imu_message_send_time_;
 
     std::vector<uint16_t> current_motor_pwms;
-
+    uint16_t light_intensity;
     static SimpleSub *_singleton;
+
+    void enable_motor_rc_channels();
+    void output_to_motors();
 
     bool pwm_is_valid(uint16_t pwm);
     bool set_motor_speed(uint16_t motor_index, uint16_t pwm);
     bool any_motor_is_on();
     void set_speeds_to_stopped();
-    void enable_motor_rc_channels();
-    void output_to_motors();
     void stop_if_delay_between_messages_too_long();
-
+    void set_light_intensity(uint16_t light_intensity_);
     void send_sensor_messages_if_needed();
 
     MAV_RESULT handle_command_long_packet(mavlink_command_long_t &command_long_packet);

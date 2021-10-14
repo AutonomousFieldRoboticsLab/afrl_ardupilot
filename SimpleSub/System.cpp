@@ -20,7 +20,12 @@ void SimpleSub::setup(void)
     num_inertial_sensors_ = MAX(accel_count, gyro_count);
 
     rcout = hal.rcout;
+    current_motor_pwms.resize(NUMBER_MOTORS);
+    hal.scheduler->delay(100);
     enable_motor_rc_channels();
+    set_speeds_to_stopped();
+
+    light_intensity = 1000;
 }
 
 void SimpleSub::loop(void)

@@ -21,7 +21,9 @@ const uint32_t HEART_BEAT_RATE_MILLIS = 1000;
 
 const uint8_t PERFORMANCE_HISTORY_LENGTH = 20;
 
-const uint8_t NUMBER_MOTORS = 6;
+const uint8_t NUMBER_MOTORS = 6; // 0 - 5
+const uint8_t LIGHT_CHANNEL = 6; // channel for light
+const uint16_t LIGHT_STEP = 200;
 
 const uint16_t MAX_MOTOR_PWM = 1900;
 const uint16_t MIN_MOTOR_PWM = 1100;

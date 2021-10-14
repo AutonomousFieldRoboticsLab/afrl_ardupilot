@@ -119,7 +119,7 @@ bool SimpleSub::set_motor_speed(uint16_t motor_index, uint16_t pwm)
         return false;
     }
 
-    if ((armed || pwm == NEUTRAL_MOTOR_PWM) && pwm_is_valid(pwm))
+    if (armed && pwm_is_valid(pwm))
     {
         current_motor_pwms[motor_index] = pwm;
         return true;
@@ -154,8 +154,10 @@ void SimpleSub::enable_motor_rc_channels()
     //hal.rcout->set_freq(0xFF, 490);
     for (int motor_channel = 0; motor_channel < NUMBER_MOTORS; ++motor_channel)
     {
-        rcout->enable_ch(motor_channel + MOTOR_RC_CHANNEL_OFFSET);
+        rcout->enable_ch(motor_channel);
     }
+
+    rcout->enable_ch(LIGHT_CHANNEL);
 
     rcout->set_freq(0xFF, MOTOR_PWM_FREQUENCY);
 
@@ -166,10 +168,12 @@ void SimpleSub::output_to_motors()
 {
     for (int motor_channel = 0; motor_channel < NUMBER_MOTORS; ++motor_channel)
     {
-        rcout->write(
-            motor_channel + MOTOR_RC_CHANNEL_OFFSET,
-            current_motor_pwms[motor_channel]);
+        // gcs().send_text(MAV_SEVERITY_NOTICE, "Motor %d: pwm %d", motor_channel, current_motor_pwms[motor_channel]);
+        rcout->write( motor_channel, current_motor_pwms[motor_channel]);
     }
+    
+    // gcs().send_text(MAV_SEVERITY_WARNING, "light intensity: %d", light_intensity);
+    rcout->write(LIGHT_CHANNEL, light_intensity);
 }
 
 MAV_RESULT SimpleSub::handle_command_long_packet(mavlink_command_long_t &command_long_packet)
@@ -218,6 +222,9 @@ bool SimpleSub::handle_rc_override_packet(mavlink_rc_channels_override_t rc_over
                    set_motor_speed(3, rc_override_packet.chan4_raw) &&
                    set_motor_speed(4, rc_override_packet.chan5_raw) &&
                    set_motor_speed(5, rc_override_packet.chan6_raw);
+    
+
+    set_light_intensity(rc_override_packet.chan7_raw);
     if (success)
     {
         last_motor_control_message_time = AP_HAL::millis();
@@ -225,6 +232,19 @@ bool SimpleSub::handle_rc_override_packet(mavlink_rc_channels_override_t rc_over
 
 
     return success;
+}
+
+void SimpleSub::set_light_intensity(uint16_t light_intensity_){
+    
+    // gcs().send_text(MAV_SEVERITY_INFO, "Recieve chan 7: %d", light_intensity_);
+    if(light_intensity_ == 1000){
+        light_intensity -= LIGHT_STEP;
+    }
+    else if(light_intensity_ == 2000){
+        light_intensity += LIGHT_STEP;
+    }
+    
+    light_intensity = MAX(1000, MIN(light_intensity, 2000));
 }
 
 void SimpleSub::arm()
