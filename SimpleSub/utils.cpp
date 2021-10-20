@@ -1,3 +1,6 @@
+#include <vector>
+#include <numeric>
+
 #include <AP_Math/AP_Math.h>
 
 namespace utils
@@ -27,5 +30,16 @@ namespace utils
                 sinf(fused_pitch) * accum_w + sinf(pitch_accel) * ac_w,
                 cosf(fused_pitch) * accum_w + cosf(pitch_accel) * ac_w);
         }
+    }
+
+    void add_performance_sample(std::vector<uint32_t> &samples, uint8_t sample_number, uint32_t sample_time)
+    {
+        samples[sample_number] = sample_time;
+    }
+
+    float get_sample_average(const std::vector<uint32_t> &samples)
+    {
+        float average = std::accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
+        return average / 1000.0;
     }
 }

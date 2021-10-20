@@ -39,7 +39,7 @@ void SimpleGCS::update_receive()
         const uint8_t c = (uint8_t)mavlink_uart->read();
 
 #ifdef SIMPLE_SUB_DEBUG
-        //send_text(MAV_SEVERITY_INFO, "Got byte %c", received_byte);
+        // send_text(MAV_SEVERITY_INFO, "Got byte %c", received_byte);
 #endif
         if (mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status))
         {
@@ -189,6 +189,7 @@ void SimpleGCS::send_heartbeat_if_needed(void)
     }
     last_heartbeat_message_time_ = current_time;
 }
+
 void SimpleGCS::send_heartbeat()
 {
 
@@ -202,6 +203,21 @@ void SimpleGCS::send_heartbeat()
         base_mode(),
         0,
         vehicle_system_status());
+
+    send_mavlink_message(&msg);
+}
+
+void SimpleGCS::send_scaled_pressure(float pressure, float temperature)
+{
+    mavlink_message_t msg;
+    mavlink_msg_scaled_pressure_pack(
+        SYSTEM_ID,
+        COMPONENT_ID,
+        &msg,
+        AP_HAL::millis(),
+        pressure,
+        0.0,
+        temperature);
 
     send_mavlink_message(&msg);
 }

@@ -1,14 +1,13 @@
 #include <AP_Math/AP_Math.h>
 
 #include "Sub.h"
+#include "utils.h"
 
 void SimpleSub::setup(void)
 {
     serial_manager.init_console();
 
     BoardConfig.init();
-
-    simple_sub.disarm();
 
     gcs().init(hal.uartA);
 
@@ -21,12 +20,30 @@ void SimpleSub::setup(void)
 
     rcout = hal.rcout;
     current_motor_pwms.resize(NUMBER_MOTORS);
-    hal.scheduler->delay(100);
+    hal.scheduler->delay(10);
     enable_motor_rc_channels();
-    set_speeds_to_stopped();
+    simple_sub.disarm();
 
     light_intensity = 1000;
+
+    depth_sensor = DepthSensor::probe(std::move(GET_I2C_DEVICE(1, HAL_BARO_MS5837_I2C_ADDR)), DepthSensor::BARO_MS5837);
+    if (!depth_sensor)
+    {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "Depth Sensor nullptr");
+        hal.scheduler->delay(10);
+    }
+
+    depth_sensor->update();
+
+    // For performance reporting
+    main_loop_rate_samples.resize(PERFORMANCE_HISTORY_LENGTH);
+    motor_control_packet_rate_samples.resize(PERFORMANCE_HISTORY_LENGTH);
+
+    serial_manager.set_blocking_writes_all(false);
+    last_main_loop_time_ = AP_HAL::millis();
 }
+
+static uint8_t loop_count = 0;
 
 void SimpleSub::loop(void)
 {
@@ -42,12 +59,34 @@ void SimpleSub::loop(void)
 
     gcs().send_heartbeat_if_needed();
 
-    // if (REPORT_PERFORMANCE_STATS)
-    // {
-    //     gcs().report_performance_stats_if_needed();
-    // }
+    if (REPORT_PERFORMANCE_STATS)
+    {
+        report_performance_stats_if_needed();
+    }
 
-    send_sensor_messages_if_needed();
+    send_imu_data_if_needed();
+    send_pressure_if_needed();
 
-    // add_performance_sample(main_loop_rate_samples, main_loop_number, last_main_loop_time);
+    uint32_t current_time = AP_HAL::millis();
+    uint32_t span = current_time - last_main_loop_time_;
+    utils::add_performance_sample(main_loop_rate_samples, loop_count, span);
+    loop_count++;
+    loop_count %= PERFORMANCE_HISTORY_LENGTH;
+    last_main_loop_time_ = current_time;
+}
+
+void SimpleSub::report_performance_stats_if_needed()
+{
+    // rate of main loop
+    // rate of motor packets being received
+
+    if (AP_HAL::millis() - last_performance_report_time_ > PERFORMANCE_STATS_REPORT_RATE)
+    {
+        float main_rate = utils::get_sample_average(main_loop_rate_samples);
+        // float motor_rate = utils::get_sample_average(motor_control_packet_rate_samples);
+
+        gcs().send_text(MAV_SEVERITY_INFO, "Main rate: %f", main_rate);
+
+        last_performance_report_time_ = AP_HAL::millis();
+    }
 }

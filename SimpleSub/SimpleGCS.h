@@ -39,5 +39,6 @@ public:
     void send_attitude(float roll, float pitch, float yaw, float rollspeed, float pitchspeed, float yawspeed);
     void send_sensor_messages_if_needed(void);
     void send_heartbeat_if_needed(void);
+    void send_scaled_pressure(float pressure, float temperature);
 
 }; // class SimpleGCS

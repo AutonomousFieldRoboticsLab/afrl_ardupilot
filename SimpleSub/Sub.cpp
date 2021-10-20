@@ -14,6 +14,8 @@ SimpleSub::SimpleSub()
     _singleton = this;
 
     last_imu_message_send_time_ = 0;
+    last_pressure_sent_time_ = 0;
+    last_performance_report_time_ = 0;
 }
 
 SimpleSub simple_sub;

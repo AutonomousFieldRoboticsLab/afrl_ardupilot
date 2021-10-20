@@ -5,7 +5,9 @@ const uint32_t PERFORMANCE_STATS_REPORT_RATE = 120000;
 
 const bool SEND_SENSOR_MESSAGES = true;
 // how often sensor stats are sent (SCALED_IMU only right now)
-const uint32_t SENSOR_MESSAGE_RATE_MILLIS = 1;
+const uint32_t IMU_MESSAGE_RATE_MILLIS = 1;
+const uint32_t PRESSURE_MESSAGE_RATE_MILLIS = 100;
+
 const uint8_t REPORT_IMU_INDEX = 0;
 
 // sets the rate at which the imu is polled. Keep this at zero or you will be sorry

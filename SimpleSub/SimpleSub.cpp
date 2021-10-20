@@ -12,7 +12,7 @@
 #include <stdio.h>
 #endif
 
-void SimpleSub::send_sensor_messages_if_needed()
+void SimpleSub::send_imu_data_if_needed()
 {
     // accel units from sensor are m/s/s
     // gyro units are rads/sec
@@ -24,7 +24,7 @@ void SimpleSub::send_sensor_messages_if_needed()
     uint32_t current_time = AP_HAL::millis();
 
     // hal.console->printf("%ld \t %ld\r\n", current_time, last_imu_message_send_time_);
-    if (current_time - last_imu_message_send_time_ > SENSOR_MESSAGE_RATE_MILLIS)
+    if (current_time - last_imu_message_send_time_ > IMU_MESSAGE_RATE_MILLIS)
     {
 
         Vector3f acceleration_vector;
@@ -63,6 +63,30 @@ void SimpleSub::send_sensor_messages_if_needed()
             gyro_vector.z);
 
         last_imu_message_send_time_ = current_time;
+    }
+}
+
+void SimpleSub::send_pressure_if_needed()
+{
+    // accel units from sensor are m/s/s
+    // gyro units are rads/sec
+
+    // scaled units are:
+    //  gyro: mrads/sec
+    // accel: mGs (weird unit)
+
+    uint32_t current_time = AP_HAL::millis();
+
+    // hal.console->printf("%ld \t %ld\r\n", current_time, last_imu_message_send_time_);
+    if (current_time - last_pressure_sent_time_ > PRESSURE_MESSAGE_RATE_MILLIS)
+    {
+
+        depth_sensor->update();
+        float pressure = depth_sensor->get_pressure() * 0.01f;
+        float temperature = depth_sensor->get_temprature() * 100;
+
+        gcs().send_scaled_pressure(pressure, temperature);
+        last_pressure_sent_time_ = current_time;
     }
 }
 
@@ -113,7 +137,7 @@ bool SimpleSub::pwm_is_valid(uint16_t pwm)
 
 bool SimpleSub::set_motor_speed(uint16_t motor_index, uint16_t pwm)
 {
-    //gcs->send_text(MAV_SEVERITY_INFO, "Setting pwm %u on chan %u valid %d", pwm, motor_index, pwm_is_valid(pwm));
+    // gcs->send_text(MAV_SEVERITY_INFO, "Setting pwm %u on chan %u valid %d", pwm, motor_index, pwm_is_valid(pwm));
     if (motor_index >= NUMBER_MOTORS)
     {
         return false;
@@ -151,7 +175,6 @@ void SimpleSub::set_speeds_to_stopped()
 
 void SimpleSub::enable_motor_rc_channels()
 {
-    //hal.rcout->set_freq(0xFF, 490);
     for (int motor_channel = 0; motor_channel < NUMBER_MOTORS; ++motor_channel)
     {
         rcout->enable_ch(motor_channel);
@@ -169,9 +192,9 @@ void SimpleSub::output_to_motors()
     for (int motor_channel = 0; motor_channel < NUMBER_MOTORS; ++motor_channel)
     {
         // gcs().send_text(MAV_SEVERITY_NOTICE, "Motor %d: pwm %d", motor_channel, current_motor_pwms[motor_channel]);
-        rcout->write( motor_channel, current_motor_pwms[motor_channel]);
+        rcout->write(motor_channel, current_motor_pwms[motor_channel]);
     }
-    
+
     // gcs().send_text(MAV_SEVERITY_WARNING, "light intensity: %d", light_intensity);
     rcout->write(LIGHT_CHANNEL, light_intensity);
 }
@@ -222,7 +245,6 @@ bool SimpleSub::handle_rc_override_packet(mavlink_rc_channels_override_t rc_over
                    set_motor_speed(3, rc_override_packet.chan4_raw) &&
                    set_motor_speed(4, rc_override_packet.chan5_raw) &&
                    set_motor_speed(5, rc_override_packet.chan6_raw);
-    
 
     set_light_intensity(rc_override_packet.chan7_raw);
     if (success)
@@ -230,20 +252,22 @@ bool SimpleSub::handle_rc_override_packet(mavlink_rc_channels_override_t rc_over
         last_motor_control_message_time = AP_HAL::millis();
     }
 
-
     return success;
 }
 
-void SimpleSub::set_light_intensity(uint16_t light_intensity_){
-    
+void SimpleSub::set_light_intensity(uint16_t light_intensity_)
+{
+
     // gcs().send_text(MAV_SEVERITY_INFO, "Recieve chan 7: %d", light_intensity_);
-    if(light_intensity_ == 1000){
+    if (light_intensity_ == 1000)
+    {
         light_intensity -= LIGHT_STEP;
     }
-    else if(light_intensity_ == 2000){
+    else if (light_intensity_ == 2000)
+    {
         light_intensity += LIGHT_STEP;
     }
-    
+
     light_intensity = MAX(1000, MIN(light_intensity, 2000));
 }
 
@@ -255,7 +279,7 @@ void SimpleSub::arm()
 void SimpleSub::disarm()
 {
     set_speeds_to_stopped();
-    // output_to_motors();
+    output_to_motors();
     armed = false;
 }
 

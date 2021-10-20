@@ -7,6 +7,7 @@
 #include <AP_SerialManager/AP_SerialManager.h>
 
 #include "SimpleGCS.h"
+#include "DepthSensor.h"
 
 // #define SIMPLE_SUB_DEBUG
 
@@ -29,7 +30,7 @@ public:
     void setup() override final;
     void loop() override final;
 
-    //avoid using gcs directly, use get_gcs() instead
+    // avoid using gcs directly, use get_gcs() instead
     SimpleGCS _gcs;
     SimpleGCS &gcs() { return _gcs; }
 
@@ -38,7 +39,7 @@ public:
     // Sensors Drivers
     AP_InertialSensor inertial_sensor;
     AP_SerialManager serial_manager;
-
+    DepthSensor *depth_sensor;
     AP_HAL::RCOutput *rcout;
 
 private:
@@ -48,23 +49,29 @@ private:
     float pitch_filtered;
 
     uint8_t num_inertial_sensors_;
+
     uint32_t last_motor_control_message_time;
     uint32_t last_imu_message_send_time_;
+    uint32_t last_pressure_sent_time_;
 
     std::vector<uint16_t> current_motor_pwms;
-    uint16_t light_intensity;
+
     static SimpleSub *_singleton;
 
     void enable_motor_rc_channels();
     void output_to_motors();
-
     bool pwm_is_valid(uint16_t pwm);
     bool set_motor_speed(uint16_t motor_index, uint16_t pwm);
     bool any_motor_is_on();
     void set_speeds_to_stopped();
     void stop_if_delay_between_messages_too_long();
+
+    uint16_t light_intensity;
     void set_light_intensity(uint16_t light_intensity_);
-    void send_sensor_messages_if_needed();
+
+    void send_imu_data_if_needed();
+    void send_pressure_if_needed();
+    void report_performance_stats_if_needed();
 
     MAV_RESULT handle_command_long_packet(mavlink_command_long_t &command_long_packet);
     MAV_RESULT handle_command_component_arm_disarm(const mavlink_command_long_t &packet);
@@ -73,6 +80,11 @@ private:
     void arm();
     void disarm();
     bool is_armed();
+
+    uint32_t last_main_loop_time_;
+    uint32_t last_performance_report_time_;
+    std::vector<uint32_t> main_loop_rate_samples;
+    std::vector<uint32_t> motor_control_packet_rate_samples;
 
 }; // class SimpleSub
 
