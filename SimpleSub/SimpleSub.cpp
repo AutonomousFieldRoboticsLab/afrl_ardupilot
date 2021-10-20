@@ -90,46 +90,6 @@ void SimpleSub::send_pressure_if_needed()
     }
 }
 
-// float get_sample_average(uint32_t *samples_ptr, uint8_t number_samples)
-// {
-//     float total_samples_seconds = 0.0;
-//     for (uint8_t i = 0; i < number_samples; ++i)
-//     {
-//         total_samples_seconds += (float)(samples_ptr[i]) / 1000.0;
-//     }
-
-//     return total_samples_seconds / (float)number_samples;
-// }
-
-// void report_performance_stats_if_needed()
-// {
-//     // rate of main loop
-//     // rate of motor packets being received
-//     // hoo boy another few rates to deal with....
-
-//     if (AP_HAL::millis() - last_performance_report > PERFORMANCE_STATS_REPORT_RATE)
-//     {
-//         float main_rate = get_sample_average(main_loop_rate_samples, PERFORMANCE_HISTORY_LENGTH);
-//         float motor_rate = get_sample_average(motor_control_packet_rate_samples, PERFORMANCE_HISTORY_LENGTH);
-
-//         gcs_ptr->send_text(MAV_SEVERITY_INFO, "Main rate: %f Motor rate: %f", main_rate, motor_rate);
-
-//         //for (int i = 0; i < 14; ++i) {
-//         //    gcs_ptr->send_text(MAV_SEVERITY_INFO, "PWM chan %u freq %u", i, sub_ptr->rcout->get_freq(i));
-//         //}
-//         last_performance_report = AP_HAL::millis();
-//     }
-// }
-
-// void add_performance_sample(uint32_t *sample_array, uint8_t &sample_number, uint32_t &last_sample_time)
-// {
-//     uint32_t current_time = AP_HAL::millis();
-//     sample_array[sample_number++] = current_time - last_sample_time;
-//     sample_number %= PERFORMANCE_HISTORY_LENGTH;
-
-//     last_sample_time = current_time;
-// }
-
 bool SimpleSub::pwm_is_valid(uint16_t pwm)
 {
     return pwm <= MAX_MOTOR_PWM && pwm >= MIN_MOTOR_PWM;
