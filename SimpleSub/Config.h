@@ -7,7 +7,10 @@ const bool SEND_SENSOR_MESSAGES = true;
 // how often sensor stats are sent (SCALED_IMU only right now)
 const uint32_t IMU_MESSAGE_RATE_MILLIS = 1;
 const uint32_t PRESSURE_MESSAGE_RATE_MILLIS = 100;
+const uint32_t MAGNETOMETER_MESSAGE_RATE_MILLIS = 50;
 
+// IMU 0 - ICM-20602
+// IMU 1 - MPU-9250
 const uint8_t REPORT_IMU_INDEX = 0;
 
 // sets the rate at which the imu is polled. Keep this at zero or you will be sorry

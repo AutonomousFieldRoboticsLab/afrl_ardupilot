@@ -135,7 +135,8 @@ void SimpleGCS::send_text(MAV_SEVERITY severity, const char *format_string, ...)
     send_mavlink_message(&message);
 }
 
-void SimpleGCS::send_imu_data(int16_t accel_x, int16_t accel_y, int16_t accel_z, int16_t gyro_x, int16_t gyro_y, int16_t gyro_z, int16_t temperature)
+void SimpleGCS::send_imu_data(int16_t accel_x, int16_t accel_y, int16_t accel_z, int16_t gyro_x, int16_t gyro_y,
+                              int16_t gyro_z, int16_t xmag, int16_t ymag, int16_t zmag, int16_t temperature)
 {
 
     mavlink_message_t msg;
@@ -150,9 +151,9 @@ void SimpleGCS::send_imu_data(int16_t accel_x, int16_t accel_y, int16_t accel_z,
         gyro_x,
         gyro_y,
         gyro_z,
-        0,
-        0,
-        0,
+        xmag,
+        ymag,
+        zmag,
         temperature);
 
     send_mavlink_message(&msg);

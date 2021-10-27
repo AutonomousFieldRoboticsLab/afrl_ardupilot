@@ -8,6 +8,7 @@
 
 #include "SimpleGCS.h"
 #include "DepthSensor.h"
+#include "Magnetometer.h"
 
 // #define SIMPLE_SUB_DEBUG
 
@@ -40,6 +41,7 @@ public:
     AP_InertialSensor inertial_sensor;
     AP_SerialManager serial_manager;
     DepthSensor *depth_sensor;
+    Magnetometer *magnetometer;
     AP_HAL::RCOutput *rcout;
 
 private:

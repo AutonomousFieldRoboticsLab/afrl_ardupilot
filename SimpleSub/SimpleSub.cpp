@@ -27,12 +27,10 @@ void SimpleSub::send_imu_data_if_needed()
     if (current_time - last_imu_message_send_time_ > IMU_MESSAGE_RATE_MILLIS)
     {
 
-        Vector3f acceleration_vector;
-        Vector3f gyro_vector;
+        Vector3f acceleration_vector = inertial_sensor.get_accel(REPORT_IMU_INDEX);
+        Vector3f gyro_vector = inertial_sensor.get_gyro(REPORT_IMU_INDEX);
 
-        acceleration_vector = inertial_sensor.get_accel(REPORT_IMU_INDEX);
-        gyro_vector = inertial_sensor.get_gyro(REPORT_IMU_INDEX);
-
+        // hal.console->printf("Accl: %f %f %f\r\n", acceleration_vector.x, acceleration_vector.y, acceleration_vector.z);
         utils::update_complementary_filter(
             gyro_vector,
             acceleration_vector,
@@ -45,6 +43,10 @@ void SimpleSub::send_imu_data_if_needed()
         float yaw = 0.0;
         float temperature = 0.0;
 
+        // magnetometer->get_magentic_field();
+
+        Vector3f magnetic_field = magnetometer->get_magentic_field();
+
         gcs().send_imu_data(
             acceleration_vector.x * 1000.0 * 0.101972,
             acceleration_vector.y * 1000.0 * 0.101972,
@@ -52,6 +54,9 @@ void SimpleSub::send_imu_data_if_needed()
             gyro_vector.x * 1000.0,
             gyro_vector.y * 1000.0,
             gyro_vector.z * 1000.0,
+            magnetic_field.x,
+            magnetic_field.y,
+            magnetic_field.z,
             temperature);
 
         gcs().send_attitude(

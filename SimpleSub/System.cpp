@@ -35,6 +35,12 @@ void SimpleSub::setup(void)
 
     depth_sensor->update();
 
+    magnetometer = Magnetometer::probe_mpu9250(0, ROTATION_ROLL_180_YAW_90);
+    if (!magnetometer)
+    {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "magnetometer nullptr");
+        hal.scheduler->delay(100);
+    }
     // For performance reporting
     main_loop_rate_samples.resize(PERFORMANCE_HISTORY_LENGTH);
     motor_control_packet_rate_samples.resize(PERFORMANCE_HISTORY_LENGTH);

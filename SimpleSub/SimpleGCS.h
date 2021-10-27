@@ -34,7 +34,8 @@ public:
     void handle_mavlink_message(const mavlink_message_t &msg);
 
     void send_text(MAV_SEVERITY severity, const char *format_string, ...);
-    void send_imu_data(int16_t accel_x, int16_t accel_y, int16_t accel_z, int16_t gyro_x, int16_t gyro_y, int16_t gyro_z, int16_t temperature);
+    void send_imu_data(int16_t accel_x, int16_t accel_y, int16_t accel_z, int16_t gyro_x, int16_t gyro_y,
+                       int16_t gyro_z, int16_t xmag, int16_t ymag, int16_t zmag, int16_t temperature);
 
     void send_attitude(float roll, float pitch, float yaw, float rollspeed, float pitchspeed, float yawspeed);
     void send_sensor_messages_if_needed(void);
