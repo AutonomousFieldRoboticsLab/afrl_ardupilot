@@ -4,6 +4,8 @@
 
 const AP_HAL::HAL &hal = AP_HAL::get_HAL();
 
+constexpr int8_t SimpleSub::_failsafe_priorities[5];
+
 SimpleSub::SimpleSub()
 {
 

@@ -95,6 +95,21 @@ void SimpleSub::send_pressure_if_needed()
     }
 }
 
+void SimpleSub::send_battery_status_if_needed()
+{
+    if (AP_HAL::millis() - last_battery_status_message_time_ > SYS_STATUS_MESSAGE_RATE_MILLIS)
+    {
+        update_battery();
+        auto voltage = get_battery_voltage();
+        auto current_amps = get_current_consumption_amps();
+
+        gcs().send_battery_status(current_amps);
+        gcs().send_sys_status(voltage, current_amps);
+
+        last_battery_status_message_time_ = AP_HAL::millis();
+    }
+}
+
 bool SimpleSub::pwm_is_valid(uint16_t pwm)
 {
     return pwm <= MAX_MOTOR_PWM && pwm >= MIN_MOTOR_PWM;
@@ -162,6 +177,35 @@ void SimpleSub::output_to_motors()
 
     // gcs().send_text(MAV_SEVERITY_WARNING, "light intensity: %d", light_intensity);
     rcout->write(LIGHT_CHANNEL, light_intensity);
+}
+
+void SimpleSub::update_battery()
+{
+    battery.read();
+}
+
+float SimpleSub::get_battery_voltage()
+{
+    return battery.voltage();
+}
+
+float SimpleSub::get_current_consumption_amps()
+{
+    float current;
+    bool success = battery.current_amps(current);
+
+    if (!success)
+    {
+        gcs().send_text(MAV_SEVERITY_WARNING, "bad %d", battery.healthy());
+    }
+
+    return current;
+}
+
+void SimpleSub::handle_battery_failsafe(const char *type, const int8_t action)
+{
+    gcs().send_text(MAV_SEVERITY_WARNING, "Got battery failsafe! %s", type);
+    battery_failsafe_triggered = true;
 }
 
 MAV_RESULT SimpleSub::handle_command_long_packet(mavlink_command_long_t &command_long_packet)

@@ -46,6 +46,14 @@ void SimpleSub::setup(void)
     motor_control_packet_rate_samples.resize(PERFORMANCE_HISTORY_LENGTH);
 
     serial_manager.set_blocking_writes_all(false);
+
+    // a bit of a nasty hack. Used to go around the ardupilot AP_Param system
+    simple_sub.battery._params[0]._type.set(AP_BattMonitor_Params::BattMonitor_Type::BattMonitor_TYPE_ANALOG_VOLTAGE_AND_CURRENT);
+    simple_sub.battery._params[0]._volt_multiplier.set(VOLTAGE_SENSOR_VOLTAGE_MULTIPLIER);
+    simple_sub.battery._params[0]._curr_amp_per_volt.set(CURRENT_SENSOR_AMPS_PER_VOLT);
+    simple_sub.battery.init();
+    battery_failsafe_triggered = false;
+
     last_main_loop_time_ = AP_HAL::millis();
 }
 
@@ -72,6 +80,7 @@ void SimpleSub::loop(void)
 
     send_imu_data_if_needed();
     send_pressure_if_needed();
+    send_battery_status_if_needed();
 
     uint32_t current_time = AP_HAL::millis();
     uint32_t span = current_time - last_main_loop_time_;

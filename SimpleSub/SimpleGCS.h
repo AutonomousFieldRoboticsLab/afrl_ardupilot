@@ -41,5 +41,7 @@ public:
     void send_sensor_messages_if_needed(void);
     void send_heartbeat_if_needed(void);
     void send_scaled_pressure(float pressure, float temperature);
+    void send_battery_status(float current_amps);
+    void send_sys_status(float battery_voltage, float current_amps);
 
 }; // class SimpleGCS

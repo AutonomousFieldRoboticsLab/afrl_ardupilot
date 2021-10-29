@@ -8,6 +8,9 @@ const bool SEND_SENSOR_MESSAGES = true;
 const uint32_t IMU_MESSAGE_RATE_MILLIS = 1;
 const uint32_t PRESSURE_MESSAGE_RATE_MILLIS = 100;
 const uint32_t MAGNETOMETER_MESSAGE_RATE_MILLIS = 50;
+// how often battery reports are sent out. Also controls battery monitor read rate
+// docs say this should be 10hz
+const uint32_t SYS_STATUS_MESSAGE_RATE_MILLIS = 100;
 
 // IMU 0 - ICM-20602
 // IMU 1 - MPU-9250
@@ -36,3 +39,6 @@ const uint16_t NEUTRAL_MOTOR_PWM = 1500;
 const uint8_t MOTOR_RC_CHANNEL_OFFSET = 0;
 
 const uint16_t MOTOR_PWM_FREQUENCY = 490;
+
+const float VOLTAGE_SENSOR_VOLTAGE_MULTIPLIER = 15.30;
+const float CURRENT_SENSOR_AMPS_PER_VOLT = 33.594;
